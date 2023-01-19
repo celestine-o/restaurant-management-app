@@ -58,7 +58,7 @@ class OrderSerializers(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = Order
-        fields = ['user', 'delivery_crew', 'status', 'total', 'date']
+        fields = ['id', 'user', 'delivery_crew', 'status', 'total', 'date']
         
         
 class OderItemSerializers(serializers.HyperlinkedModelSerializer):
@@ -71,7 +71,7 @@ class OderItemSerializers(serializers.HyperlinkedModelSerializer):
     
     class Meta:
         model = OrderItem
-        fields = ['order', 'menuitem', 'quantity', 'unit_price']
+        fields = ['id', 'order', 'menuitem', 'quantity', 'unit_price']
         
     def menuItem_count(self, product:MenuItem):
         return product.count()
