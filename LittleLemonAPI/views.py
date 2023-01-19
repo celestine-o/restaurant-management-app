@@ -23,7 +23,7 @@ class SingleMenuItemView(viewsets.ModelViewSet):
     def get_permissions(self):
         return [] if (self.request.method==['POST', 'PUT', 'PATCH', 'DELETE']) else [IsAuthenticated]
     
-class CartItemsView(viewsets.ModelViewSet):
+class CartView(viewsets.ModelViewSet):
     throttle_classes = [AnonRateThrottle]
     queryset = Cart.objects.all()
     serializer_class = CartSerializers
