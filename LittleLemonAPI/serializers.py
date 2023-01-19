@@ -1,15 +1,16 @@
 from rest_framework import serializers
 import bleach
 from .models import MenuItem, Category, Order, OrderItem, Cart
-from decimal import Decimal
 from rest_framework.validators import UniqueTogetherValidator
 from django.contrib.auth.models import User
+from datetime import date
 
 
 class CategorySerializers(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'slug', 'title']
+        
         
 class MenuItemSerializers(serializers.HyperlinkedModelSerializer):
     def validate(self, attrs):
@@ -21,6 +22,7 @@ class MenuItemSerializers(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = MenuItem
         fields = ['id','title', 'price', 'featured', 'category']
+        
         
 class CartSerializers(serializers.HyperlinkedModelSerializer):
     quantity = serializers.SerializerMethodField(method_name='menuItem_count')
@@ -44,3 +46,32 @@ class CartSerializers(serializers.HyperlinkedModelSerializer):
     
     def calculate_price(self, product:MenuItem):
         return sum(product.price)
+    
+    
+class OrderSerializers(serializers.HyperlinkedModelSerializer):
+    date = date()
+    
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        default = serializers.CurrentUserDefault,
+    )
+    
+    class Meta:
+        model = Order
+        fields = ['user', 'delivery_crew', 'status', 'total', 'date']
+        
+        
+class OderItemSerializers(serializers.HyperlinkedModelSerializer):
+    quantity = serializers.SerializerMethodField(method_name='menuItem_count')
+    
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        default = serializers.CurrentUserDefault,
+    )
+    
+    class Meta:
+        model = OrderItem
+        fields = ['order', 'menuitem', 'quantity', 'unit_price']
+        
+    def menuItem_count(self, product:MenuItem):
+        return product.count()
