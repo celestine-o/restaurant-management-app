@@ -5,7 +5,7 @@ from .models import MenuItem, Cart, Order
 from .serializers import MenuItemSerializers, CartSerializers, OrderSerializers
 
 # Create your views here.
-class MenuItemView(viewsets.ModelViewSet):
+class MenuItemsView(viewsets.ModelViewSet):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializers

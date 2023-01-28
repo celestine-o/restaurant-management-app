@@ -49,7 +49,7 @@ class CartSerializers(serializers.HyperlinkedModelSerializer):
     
     
 class OrderSerializers(serializers.HyperlinkedModelSerializer):
-    date = date()
+    date = date
     
     user = serializers.PrimaryKeyRelatedField(
         queryset=User.objects.all(),

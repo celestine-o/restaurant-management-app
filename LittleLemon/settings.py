@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'LittleLemon',
+    'LittleLemonAPI',
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
@@ -151,8 +151,6 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '5/minute',
         'user': '10/minute',
-        'ten': '10/minute',
-        'fifty': '50/minute',
     }
 }
 
