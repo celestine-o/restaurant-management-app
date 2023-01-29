@@ -16,6 +16,9 @@ class MenuItem(models.Model):
     featured = models.BooleanField(db_index=True)
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     
+    class Meta:
+        ordering=['featured', 'category']
+    
     def __str__(self) -> str:
         return self.title
     

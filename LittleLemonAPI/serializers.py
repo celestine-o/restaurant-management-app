@@ -12,7 +12,7 @@ class CategorySerializers(serializers.ModelSerializer):
         fields = ['id', 'slug', 'title']
         
         
-class MenuItemSerializers(serializers.HyperlinkedModelSerializer):
+class MenuItemSerializers(serializers.ModelSerializer):
     def validate(self, attrs):
         if(attrs['price'] >= 0.01):
             # Using bleach for sanitization
