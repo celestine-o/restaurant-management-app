@@ -14,9 +14,9 @@ class CategorySerializers(serializers.ModelSerializer):
         
 class MenuItemSerializers(serializers.ModelSerializer):
     def validate(self, attrs):
-        if(attrs['price'] >= 0.01):
+        if(attrs['price']<0.01):
             # Using bleach for sanitization
-            attrs['title'] = bleach.clear(attrs['title'])
+            attrs['title'] = bleach.clean(attrs['title'])
             raise serializers.ValidationError('Price should not be less than 0.01')
         return super().validate(attrs)
     class Meta:
@@ -24,29 +24,27 @@ class MenuItemSerializers(serializers.ModelSerializer):
         fields = ['id','title', 'price', 'featured', 'category']
         
         
-class CartSerializers(serializers.HyperlinkedModelSerializer):
-    quantity = serializers.SerializerMethodField(method_name='menuItem_count')
-    price = serializers.SerializerMethodField(method_name='calculate_price')
+class CartSerializers(serializers.ModelSerializer):
+    #unit_price = serializers.ReadOnlyField(source='menuItem.price')
+    price = serializers.SerializerMethodField()
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        default = serializers.CurrentUserDefault,
-    )
+    def validate(self, data):
+        menuItem = data.get('menuItem')
+        unit_price = menuItem.price
+        quantity = data.get('quantity')
+        data['menuItem'] = menuItem
+        data['price'] = unit_price * quantity
+        return data
+
     class Meta:
         model = Cart
-        fields = ['id', 'user', 'menuItem', 'quantity', 'unit_price', 'price']
-    validators = [
-        UniqueTogetherValidator(
-            queryset=Cart.objects.all(),
-            fields= ['user', 'menuItem']
-        )
-    ]
-    def menuItem_count(self, product:MenuItem):
-        return product.count()
-    
-    def calculate_price(self, product:MenuItem):
-        return sum(product.price)
-    
+        fields = ('id', 'user', 'menuItem', 'quantity', 'unit_price', 'price')
+        
+    def get_price(self, obj):
+        print(MenuItem.price)
+        return round(obj.unit_price * obj.quantity, 2)    
     
 class OrderSerializers(serializers.HyperlinkedModelSerializer):
     date = date

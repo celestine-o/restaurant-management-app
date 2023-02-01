@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from .models import MenuItem, Cart, Order
@@ -20,13 +20,17 @@ class SingleMenuItemView(viewsets.ModelViewSet):
     queryset = MenuItem.objects.all()
     serializer_class = MenuItemSerializers
     
-    def get_permissions(self):
-        return [] if (self.request.method==['POST', 'PUT', 'PATCH', 'DELETE']) else [IsAuthenticated]
+    #def get_permissions(self):
+    #    return [] if (self.request.method==['POST', 'PUT', 'PATCH', 'DELETE']) else [IsAuthenticated]
     
 class CartView(viewsets.ModelViewSet):
     throttle_classes = [AnonRateThrottle]
     queryset = Cart.objects.all()
     serializer_class = CartSerializers
+    
+    #def get_permissions(self):
+    #    return [] if (self.request.method==['POST', 'PUT', 'PATCH', 'DELETE']) else [IsAuthenticated]
+    
     
 class OrderView(viewsets.ModelViewSet):
     throttle_classes = [AnonRateThrottle]
