@@ -25,26 +25,23 @@ class MenuItemSerializers(serializers.ModelSerializer):
         
         
 class CartSerializers(serializers.ModelSerializer):
-    #unit_price = serializers.ReadOnlyField(source='menuItem.price')
-    price = serializers.SerializerMethodField()
+    menuItem = serializers.PrimaryKeyRelatedField(queryset=MenuItem.objects.all())
+    unit_price = serializers.DecimalField(max_digits=6, decimal_places=2, read_only=True)
+    price = serializers.DecimalField(max_digits=6, decimal_places=2, read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-
-    
-    def validate(self, data):
-        menuItem = data.get('menuItem')
-        unit_price = menuItem.price
-        quantity = data.get('quantity')
-        data['menuItem'] = menuItem
-        data['price'] = unit_price * quantity
-        return data
-
+     
     class Meta:
         model = Cart
         fields = ('id', 'user', 'menuItem', 'quantity', 'unit_price', 'price')
-        
-    def get_price(self, obj):
-        print(MenuItem.price)
-        return round(obj.unit_price * obj.quantity, 2)    
+
+    def validate(self, data):
+        quantity = data.get('quantity')
+        menuItem = data.get('menuItem')
+        if quantity and menuItem:
+            data['price'] = quantity * menuItem.price
+            data['unit_price'] = menuItem.price
+        return data
+
     
 class OrderSerializers(serializers.HyperlinkedModelSerializer):
     date = date
