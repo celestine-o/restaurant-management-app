@@ -44,12 +44,8 @@ class CartSerializers(serializers.ModelSerializer):
 
     
 class OrderSerializers(serializers.HyperlinkedModelSerializer):
-    date = date
-    
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        default = serializers.CurrentUserDefault,
-    )
+    date = serializers.DateTimeField(read_only=True)
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     
     class Meta:
         model = Order

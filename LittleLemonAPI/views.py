@@ -28,8 +28,13 @@ class CartView(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializers
     
-    #def get_permissions(self):
-    #    return [] if (self.request.method==['POST', 'PUT', 'PATCH', 'DELETE']) else [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        return Cart.objects.filter(user=user)
+
+    def perform_destroy(self, instance):
+        instance.delete()
     
     
 class OrderView(viewsets.ModelViewSet):
@@ -38,8 +43,6 @@ class OrderView(viewsets.ModelViewSet):
     serializer_class = OrderSerializers
     ordering_fields = ['status', 'date', 'menuItem']
     
-    def get_permissions(self):
-        return [] if (self.request.method==['POST', 'PUT', 'PATCH', 'DELETE']) else [IsAuthenticated]
 
 class SingleOrderView(viewsets.ModelViewSet):
     throttle_classes = [AnonRateThrottle]
