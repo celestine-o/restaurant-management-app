@@ -20,6 +20,9 @@ urlpatterns = [
         'post': 'create',
         'delete' : 'destroy'
     })),
-    path('orders', views.OrderView.as_view({'get': 'list'})),
+    path('orders', views.OrderView.as_view({
+        'get': 'list',
+        'post': 'create',
+    })),
     path('orders/{orderId}', views.SingleOrderView.as_view({'get': 'retrieve'})),
 ]

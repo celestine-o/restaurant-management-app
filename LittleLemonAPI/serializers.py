@@ -43,7 +43,7 @@ class CartSerializers(serializers.ModelSerializer):
         return data
 
     
-class OrderSerializers(serializers.HyperlinkedModelSerializer):
+class OrderSerializers(serializers.ModelSerializer):
     date = serializers.DateTimeField(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     
