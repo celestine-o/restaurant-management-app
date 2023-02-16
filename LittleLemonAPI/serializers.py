@@ -1,5 +1,6 @@
 from rest_framework import serializers
 import bleach
+import contextlib
 from .models import MenuItem, Category, Order, OrderItem, Cart
 from rest_framework.validators import UniqueTogetherValidator
 from django.contrib.auth.models import User
@@ -23,9 +24,49 @@ class MenuItemSerializers(serializers.ModelSerializer):
         model = MenuItem
         fields = ['id','title', 'price', 'featured', 'category']
         
-        
-class CartSerializers(serializers.ModelSerializer):
+    
+class CartPostSerializer(serializers.ModelSerializer):
     menuItem = serializers.PrimaryKeyRelatedField(queryset=MenuItem.objects.all())
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    
+    class Meta:
+        model = Cart
+        fields = ('id', 'user', 'menuItem', 'quantity')
+        
+    def validate(self, data):
+        quantity = data.get('quantity')
+        menuItem = data.get('menuItem')
+        user = data.get('user', None)
+        
+        def validate(self, data):
+            quantity = data.get('quantity')
+            menuItem = data.get('menuItem')
+            user = data.get('user', None)
+            
+            # Check if a cart with the same menuItem exists
+            try:
+                cart = Cart.objects.get(menuItem=menuItem, user=user)
+                cart.quantity += quantity
+                cart.price = cart.unit_price * cart.quantity
+                cart.save()
+                raise serializers.ValidationError(f"Added {quantity} {menuItem.title} to cart")
+            except Cart.DoesNotExist:
+                pass
+            return data
+
+class CartGetSerializer(serializers.ModelSerializer):
+    menuItem_name = serializers.CharField(source='menuItem.title', read_only=True)
+    unit_price = serializers.DecimalField(max_digits=6, decimal_places=2, read_only=True)
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    
+    class Meta:
+        model = Cart
+        fields = ('id', 'user', 'menuItem', 'menuItem_name', 'quantity', 'unit_price', 'price')
+    
+class CartSerializers(serializers.ModelSerializer):
+    # menuItem = serializers.PrimaryKeyRelatedField(queryset=MenuItem.objects.all())
+    # To display menuItem's title use the MenuItemSerializer
+    menuItem = MenuItemSerializers()
     unit_price = serializers.DecimalField(max_digits=6, decimal_places=2, read_only=True)
     price = serializers.DecimalField(max_digits=6, decimal_places=2, read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
@@ -37,9 +78,25 @@ class CartSerializers(serializers.ModelSerializer):
     def validate(self, data):
         quantity = data.get('quantity')
         menuItem = data.get('menuItem')
+        user = data.get('user', None)
+
+        # Check if a cart with the same menuItem exists
+        #try:
+        #    cart = Cart.objects.get(menuItem=menuItem, user=user)
+        #    cart.quantity += quantity
+        #    cart.price = cart.unit_price * cart.quantity
+        #    cart.save()
+        #   #raise serializers.ValidationError(f"Added {quantity} {menuItem.title} to cart")
+        #except Cart.DoesNotExist:
+        #    pass
+
+        # Create new cart
         if quantity and menuItem:
             data['price'] = quantity * menuItem.price
             data['unit_price'] = menuItem.price
+        if menuItem in data:
+            quantity =+ quantity
+        print(data)
         return data
 
     
