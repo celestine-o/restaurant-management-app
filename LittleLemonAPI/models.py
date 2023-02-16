@@ -31,6 +31,9 @@ class Cart(models.Model):
     
     class Meta:
         ordering=['quantity', 'unit_price']
+    
+    def __str__(self) -> str:
+        return self.menuItem
         
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -53,12 +53,8 @@ class OrderSerializers(serializers.ModelSerializer):
         
         
 class OderItemSerializers(serializers.HyperlinkedModelSerializer):
-    quantity = serializers.SerializerMethodField(method_name='menuItem_count')
-    
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        default = serializers.CurrentUserDefault,
-    )
+    quantity = serializers.SerializerMethodField(method_name='menuItem_count')  
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     
     class Meta:
         model = OrderItem
