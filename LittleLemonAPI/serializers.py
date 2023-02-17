@@ -27,77 +27,43 @@ class MenuItemSerializers(serializers.ModelSerializer):
     
 class CartPostSerializer(serializers.ModelSerializer):
     menuItem = serializers.PrimaryKeyRelatedField(queryset=MenuItem.objects.all())
+    quantity = serializers.IntegerField(min_value=1)
+    unit_price = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
+    price = serializers.DecimalField(max_digits=5, decimal_places=2, read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     
     class Meta:
         model = Cart
-        fields = ('id', 'user', 'menuItem', 'quantity')
+        fields = ('id', 'user', 'menuItem', 'unit_price', 'price', 'quantity')
         
-    def validate(self, data):
-        quantity = data.get('quantity')
-        menuItem = data.get('menuItem')
-        user = data.get('user', None)
-        
-        def validate(self, data):
-            quantity = data.get('quantity')
-            menuItem = data.get('menuItem')
-            user = data.get('user', None)
-            
-            # Check if a cart with the same menuItem exists
-            try:
-                cart = Cart.objects.get(menuItem=menuItem, user=user)
-                cart.quantity += quantity
-                cart.price = cart.unit_price * cart.quantity
-                cart.save()
-                raise serializers.ValidationError(f"Added {quantity} {menuItem.title} to cart")
-            except Cart.DoesNotExist:
-                pass
-            return data
+    def create(self, validated_data):
+        menuItem = validated_data.get('menuItem')
+        quantity = validated_data.get('quantity')
+        user = self.context['request'].user   
+
+        try:
+            cart_item = Cart.objects.get(user=user, menuItem=menuItem)
+            cart_item.quantity += quantity
+            cart_item.price = cart_item.unit_price * cart_item.quantity
+            cart_item.save()
+        except Cart.DoesNotExist:
+           cart_item = Cart.objects.create(
+               user=user,
+               menuItem=menuItem,
+               quantity=quantity,
+               unit_price=menuItem.price,
+               price=quantity * menuItem.price
+           )
+        return cart_item
 
 class CartGetSerializer(serializers.ModelSerializer):
-    menuItem_name = serializers.CharField(source='menuItem.title', read_only=True)
+    menuItem = serializers.CharField(source='menuItem.title', read_only=True)
     unit_price = serializers.DecimalField(max_digits=6, decimal_places=2, read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     
-    class Meta:
-        model = Cart
-        fields = ('id', 'user', 'menuItem', 'menuItem_name', 'quantity', 'unit_price', 'price')
-    
-class CartSerializers(serializers.ModelSerializer):
-    # menuItem = serializers.PrimaryKeyRelatedField(queryset=MenuItem.objects.all())
-    # To display menuItem's title use the MenuItemSerializer
-    menuItem = MenuItemSerializers()
-    unit_price = serializers.DecimalField(max_digits=6, decimal_places=2, read_only=True)
-    price = serializers.DecimalField(max_digits=6, decimal_places=2, read_only=True)
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-     
     class Meta:
         model = Cart
         fields = ('id', 'user', 'menuItem', 'quantity', 'unit_price', 'price')
-
-    def validate(self, data):
-        quantity = data.get('quantity')
-        menuItem = data.get('menuItem')
-        user = data.get('user', None)
-
-        # Check if a cart with the same menuItem exists
-        #try:
-        #    cart = Cart.objects.get(menuItem=menuItem, user=user)
-        #    cart.quantity += quantity
-        #    cart.price = cart.unit_price * cart.quantity
-        #    cart.save()
-        #   #raise serializers.ValidationError(f"Added {quantity} {menuItem.title} to cart")
-        #except Cart.DoesNotExist:
-        #    pass
-
-        # Create new cart
-        if quantity and menuItem:
-            data['price'] = quantity * menuItem.price
-            data['unit_price'] = menuItem.price
-        if menuItem in data:
-            quantity =+ quantity
-        print(data)
-        return data
 
     
 class OrderSerializers(serializers.ModelSerializer):

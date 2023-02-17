@@ -2,7 +2,7 @@ from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from .models import MenuItem, Cart, Order
-from .serializers import MenuItemSerializers, CartSerializers, OrderSerializers, CartPostSerializer, CartGetSerializer
+from .serializers import MenuItemSerializers, OrderSerializers, CartPostSerializer, CartGetSerializer
 
 # Create your views here.
 class MenuItemsView(viewsets.ModelViewSet):
