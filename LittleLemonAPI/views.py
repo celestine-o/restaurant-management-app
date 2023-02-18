@@ -2,7 +2,7 @@ from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from .models import MenuItem, Cart, Order
-from .serializers import MenuItemSerializers, OrderSerializers, CartPostSerializer, CartGetSerializer
+from .serializers import *
 
 # Create your views here.
 class MenuItemsView(viewsets.ModelViewSet):
@@ -26,11 +26,6 @@ class SingleMenuItemView(viewsets.ModelViewSet):
 class CartView(viewsets.ModelViewSet):
     throttle_classes = [AnonRateThrottle]
     queryset = Cart.objects.all()
-    # serializer_class = CartSerializers
-    
-    #def get_queryset(self):
-    #    user = self.request.user
-    #    return Cart.objects.filter(user=user)
     
     def get_serializer_class(self):
         if self.request.method == 'GET':
@@ -45,14 +40,23 @@ class CartView(viewsets.ModelViewSet):
 class OrderView(viewsets.ModelViewSet):
     throttle_classes = [AnonRateThrottle]
     queryset = Order.objects.all()
-    serializer_class = OrderSerializers
     ordering_fields = ['status', 'date', 'menuItem']
+    
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return OrderGetSerializer
+        else:
+            return OrderPostSerializer
+        
+    # mehtod to delete orders
+    def perform_destroy(self, instance):
+        return super().perform_destroy(instance)
     
 
 class SingleOrderView(viewsets.ModelViewSet):
     throttle_classes = [AnonRateThrottle]
     queryset = Order.objects.all()
-    serializer_class = OrderSerializers
+    serializer_class = OrderGetSerializer
     
     def get_permissions(self):
         return [] if (self.request.method==['POST', 'PUT', 'PATCH', 'DELETE']) else [IsAuthenticated]

@@ -66,7 +66,20 @@ class CartGetSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'menuItem', 'quantity', 'unit_price', 'price')
 
     
-class OrderSerializers(serializers.ModelSerializer):
+class OrderPostSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(read_only=True)
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    price = serializers.DecimalField(source='cart.price', max_digits=6, decimal_places=2, read_only=True)
+    total = serializers.SerializerMethodField(method_name='calculate_total')
+    
+    class Meta:
+        model = Order
+        fields = ['id', 'user', 'delivery_crew', 'status', 'total', 'date']
+    
+    def calculate_total(self, price):
+        return round(sum(price), 2)
+
+class OrderGetSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(read_only=True)
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     
