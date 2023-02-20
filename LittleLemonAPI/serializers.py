@@ -66,8 +66,8 @@ class CartGetSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'menuItem', 'quantity', 'unit_price', 'price')
 
     
-class OrderPostSerializer(serializers.ModelSerializer):
-    date = serializers.DateTimeField()
+class OrderSerializer(serializers.ModelSerializer):
+    #date = serializers.DateTimeField()
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     #total = serializers.SerializerMethodField(method_name='calculate_total')
     
@@ -75,25 +75,9 @@ class OrderPostSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'user', 'delivery_crew', 'status', 'total', 'date']
     
-    def calculate_total(self, product:Cart):
-        return round(sum(Cart.price), 2)
-
-class OrderGetSerializer(serializers.ModelSerializer):
-    date = serializers.DateTimeField(read_only=True)
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    
-    class Meta:
-        model = Order
-        fields = ['id', 'user', 'delivery_crew', 'status', 'total', 'date']
         
         
-class OderItemSerializers(serializers.HyperlinkedModelSerializer):
-    quantity = serializers.SerializerMethodField(method_name='menuItem_count')  
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    
+class OrderItemSerializers(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
-        fields = ['id', 'order', 'menuitem', 'quantity', 'unit_price']
-        
-    def menuItem_count(self, product:MenuItem):
-        return product.count()
+        fields = '__all__'

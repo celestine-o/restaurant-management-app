@@ -41,13 +41,14 @@ class OrderView(viewsets.ModelViewSet):
     throttle_classes = [AnonRateThrottle]
     queryset = Order.objects.all()
     ordering_fields = ['status', 'date', 'menuItem']
+    serializer_class = OrderSerializer
     
-    def get_serializer_class(self):
-        if self.request.method == 'GET':
-            return OrderGetSerializer
-        else:
-            return OrderPostSerializer
-        
+   # def get_serializer_class(self):
+   #     if self.request.method == 'GET':
+   #         return OrderGetSerializer
+   #     else:
+   #         return OrderPostSerializer
+   #     
     # mehtod to delete orders
     def perform_destroy(self, instance):
         return super().perform_destroy(instance)
@@ -56,7 +57,7 @@ class OrderView(viewsets.ModelViewSet):
 class SingleOrderView(viewsets.ModelViewSet):
     throttle_classes = [AnonRateThrottle]
     queryset = Order.objects.all()
-    serializer_class = OrderGetSerializer
+    serializer_class = OrderSerializer
     
-    def get_permissions(self):
-        return [] if (self.request.method==['POST', 'PUT', 'PATCH', 'DELETE']) else [IsAuthenticated]
+    #def get_permissions(self):
+    #    return [] if (self.request.method==['POST', 'PUT', 'PATCH', 'DELETE']) else [IsAuthenticated]
